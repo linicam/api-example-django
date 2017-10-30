@@ -27,6 +27,12 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['drchrono.hdh9ypmwvt.us-east-1.elasticbeanstalk.com']
 
+SOCIAL_AUTH_DRCHRONO_KEY = 'IkTjfnJytS78j8eiuRB52DXdbIX590LnDU4neuGl'
+
+SOCIAL_AUTH_DRCHRONO_SECRET = 'vHCSGGtvzEHAcqI6mewooU5alwzFXypUIp0FBAcju8SAZF6WMHC9kvK' \
+                              'eoSPPbJwT1Y6G9o0RHTsb52PSpBuH1foWWrslHgAQrnw0VW58FxNCWeVm1HAJP8bLn8gAEoQF'
+
+LOGIN_REDIRECT_URL = 'http://drchrono.hdh9ypmwvt.us-east-1.elasticbeanstalk.com/'
 
 # Application definition
 
