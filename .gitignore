@@ -91,8 +91,6 @@ ENV/
 
 # Rope project settings
 .ropeproject
-
-db.sqlite3
 
 # Elastic Beanstalk Files
 .elasticbeanstalk/*
