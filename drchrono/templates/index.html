@@ -1,8 +1,9 @@
-<!DOCTYPE html>
-<html>
-  <body>
+{% extends 'base.html' %}
+{% block head %}
+    <title>Home</title>
+{% endblock %}
+{% block body %}
     <a href="{% url 'social:begin' 'drchrono' %}">
       drchrono OAuth
     </a>
-  </body>
-</html>
+{% endblock %}

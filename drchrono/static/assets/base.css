@@ -1,0 +1,11 @@
+body {
+    padding: 20px 5%;
+}
+table {
+    margin: 20px 0;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-left: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}

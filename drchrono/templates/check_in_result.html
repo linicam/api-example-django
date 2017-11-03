@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block head %}
+    <title>Check in result</title>
+{% endblock %}
+{% block body %}
+{{ message }}<br>
+{% if state %}
+    Would you like to update your information?<br>
+    <a href="{% url 'update' %}">Yes</a><br>
+    <a href="{% url 'checkin' %}">No</a><br>
+{% endif %}
+redirect after {{ time }} seconds<br>
+{% if not state %}
+<a href="{% url 'checkin' %}">back</a>
+{% endif %}
+{% endblock %}
+{% block js %}
+<script>
+    function redirect(){
+       window.location.href = "{% url 'checkin' %}";
+    }
+    var t = {{ time }};
+    setTimeout(redirect, t * 1000); //2000 is equivalent to 2 seconds
+</script>
+{% endblock %}

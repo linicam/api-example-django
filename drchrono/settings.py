@@ -32,7 +32,27 @@ SOCIAL_AUTH_DRCHRONO_KEY = 'IkTjfnJytS78j8eiuRB52DXdbIX590LnDU4neuGl'
 SOCIAL_AUTH_DRCHRONO_SECRET = 'vHCSGGtvzEHAcqI6mewooU5alwzFXypUIp0FBAcju8SAZF6WMHC9kvK' \
                               'eoSPPbJwT1Y6G9o0RHTsb52PSpBuH1foWWrslHgAQrnw0VW58FxNCWeVm1HAJP8bLn8gAEoQF'
 
-LOGIN_REDIRECT_URL = 'http://drchrono.hdh9ypmwvt.us-east-1.elasticbeanstalk.com/'
+SOCIAL_AUTH_DRCHRONO_AUTH_EXTRA_ARGUMENTS = {
+    'access_type': 'offline',
+    'approval_prompt': 'auto'
+}
+
+LOGIN_URL = '/'
+LOGIN_REDIRECT_URL = '/done/'
+DISCONNECT_REDIRECT_URL = '/'
+
+SOCIAL_AUTH_PIPELINE = (
+    'social.pipeline.social_auth.social_details',
+    'social.pipeline.social_auth.social_uid',
+    'social.pipeline.social_auth.auth_allowed',
+    'social.pipeline.social_auth.social_user',
+    'social.pipeline.user.get_username',
+    'social.pipeline.user.create_user',
+    'social_auth_drchrono.backends.add_user',
+    'social.pipeline.social_auth.associate_user',
+    'social.pipeline.social_auth.load_extra_data',
+    'social.pipeline.user.user_details',
+)
 
 # Application definition
 
@@ -108,10 +128,15 @@ USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+# USE_TZ = True # timezone support
 
+DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/drchrono/static/'
+
+STATIC_ROOT = 'E:/pro/api-example-django/drchrono/static'
+
+STATICFILES_DIRS = []
