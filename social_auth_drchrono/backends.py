@@ -1,7 +1,8 @@
+from django.contrib.auth.models import User
 from social.backends.oauth import BaseOAuth2
 
 from drchrono.helpers import helper
-from drchrono.helpers.helper import DrchronoRequest
+from drchrono.helpers.drchrono_request import get_auth_headers
 from drchrono.models import Doctor
 
 
@@ -20,6 +21,7 @@ class drchronoOAuth2(BaseOAuth2):
         ('refresh_token', 'refresh_token'),
         ('expires_in', 'expires_in')
     ]
+
     # TODO: setup proper token refreshing
 
     def get_user_details(self, response):
@@ -42,16 +44,20 @@ class drchronoOAuth2(BaseOAuth2):
         """
         return self.get_json(
             self.USER_DATA_URL,
-            headers=helper.get_auth_headers(access_token)
+            headers=get_auth_headers(access_token)
         )
 
 
 def add_user(details, user, uid, *args, **kwargs):
-    try:
-        profile = Doctor.objects.get(user=user)
-    except Doctor.objects.model.DoesNotExist:
+    profile = Doctor.objects.filter(pk=details['doctor_id'])
+    if len(profile) != 1:
         profile = Doctor(username=details['username'], doctor_id=details['doctor_id'],
-                         uid=uid, user=user, access_token=details['access_token'],
-                         refresh_token=details['refresh_token'], practice_group=details['practice_group'])
+                         uid=uid)
+    else:
+        profile = profile[0]
     profile.save()
-
+    user.profile.doctor = profile
+    user.profile.access_token = details['access_token']
+    user.profile.refresh_token = details['refresh_token']
+    user.save()
+    # print vars(user)

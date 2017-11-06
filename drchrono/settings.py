@@ -15,7 +15,6 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/1.8/howto/deployment/checklist/
 
@@ -23,14 +22,28 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '=*l&a&rk7jmiw$3euke*z9lu-na!^j^i&ddejfik!ajqlaymmc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
+
+# when restart the server, need to update local db or not, work if create_new is true
+SYNC_AT_GV = False
+# if set False, won't send requests to drchrono, else send but only create new things, no update local db
+# for safe, this should always be True
+SYNC_CREATE_NEW = True
+SYNC_PERIOD = 3
 
 ALLOWED_HOSTS = ['drchrono.hdh9ypmwvt.us-east-1.elasticbeanstalk.com']
 
-SOCIAL_AUTH_DRCHRONO_KEY = 'IkTjfnJytS78j8eiuRB52DXdbIX590LnDU4neuGl'
+# linicam
+# SOCIAL_AUTH_DRCHRONO_KEY = 'IkTjfnJytS78j8eiuRB52DXdbIX590LnDU4neuGl'
+# tapir
+SOCIAL_AUTH_DRCHRONO_KEY = 'ax8am1bvYqQy5p0VvFBQQ4e57UEeJZdum3mdz00X'
 
-SOCIAL_AUTH_DRCHRONO_SECRET = 'vHCSGGtvzEHAcqI6mewooU5alwzFXypUIp0FBAcju8SAZF6WMHC9kvK' \
-                              'eoSPPbJwT1Y6G9o0RHTsb52PSpBuH1foWWrslHgAQrnw0VW58FxNCWeVm1HAJP8bLn8gAEoQF'
+# linicam
+# SOCIAL_AUTH_DRCHRONO_SECRET = 'vHCSGGtvzEHAcqI6mewooU5alwzFXypUIp0FBAcju8SAZF6WMHC9kvK' \
+#                               'eoSPPbJwT1Y6G9o0RHTsb52PSpBuH1foWWrslHgAQrnw0VW58FxNCWeVm1HAJP8bLn8gAEoQF'
+# tapir
+SOCIAL_AUTH_DRCHRONO_SECRET = 'LSFBxoyKVPcgz6uOUPhvuNSA8mn7xjH0F134KJPFPgLh5gRmU5IJCHIqA' \
+                              'GgbPdozi9kvPfZaojZgWCzzrjQxXdYxskIKkR9i15DmmqFXLYhoqcwKSMlW8njuBteZ09LD'
 
 SOCIAL_AUTH_DRCHRONO_AUTH_EXTRA_ARGUMENTS = {
     'access_type': 'offline',
@@ -38,16 +51,21 @@ SOCIAL_AUTH_DRCHRONO_AUTH_EXTRA_ARGUMENTS = {
 }
 
 LOGIN_URL = '/'
-LOGIN_REDIRECT_URL = '/done/'
+SOCIAL_AUTH_DRCHRONO_LOGIN_REDIRECT_URL = '/identity/'
+SOCIAL_AUTH_DRCHRONO_LOGIN_ERROR_URL = '/oauth'
 DISCONNECT_REDIRECT_URL = '/'
+IDENTITY_URL = '/identity/'
+
+MEDIA_ROOT = 'E:/pro/api-example-django/drchrono/static/media'
+# MEDIA_URL
 
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
     'social.pipeline.social_auth.social_uid',
     'social.pipeline.social_auth.auth_allowed',
     'social.pipeline.social_auth.social_user',
-    'social.pipeline.user.get_username',
-    'social.pipeline.user.create_user',
+    # 'social.pipeline.user.get_username',
+    # 'social.pipeline.user.create_user',
     'social_auth_drchrono.backends.add_user',
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
@@ -76,6 +94,7 @@ MIDDLEWARE_CLASSES = (
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'social.apps.django_app.middleware.SocialAuthExceptionMiddleware',
 )
 
 AUTHENTICATION_BACKENDS = (
@@ -88,7 +107,7 @@ ROOT_URLCONF = 'drchrono.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates').replace('\\','/'),],
+        'DIRS': [os.path.join(BASE_DIR, 'templates').replace('\\', '/'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -105,7 +124,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'drchrono.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/1.8/ref/settings/#databases
 
@@ -115,7 +133,6 @@ DATABASES = {
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.8/topics/i18n/
@@ -131,6 +148,8 @@ USE_L10N = True
 # USE_TZ = True # timezone support
 
 DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S'
+DISPLAY_DATETIME_FORMAT = '%Y-%m-%d %H:%M:%S'
+DATE_FORMAT = '%Y-%m-%d'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.8/howto/static-files/

@@ -1,0 +1,36 @@
+body {
+    padding: 20px 5%;
+}
+table {
+    margin: 20px 0;
+    width: 100%;
+    border: 1px solid #ccc;
+    border-left: 0;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+a:not([href]):not([tabindex]){
+    color: #007bff;
+    text-decoration: none;
+    background-color: transparent;
+    -webkit-text-decoration-skip: objects;
+}
+
+a:not([href]):not([tabindex]):hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+li {
+    /*list-style-type: none;*/
+}
+
+fieldset {
+    border: 1px solid;
+    -webkit-margin-start: 2px;
+    -webkit-margin-end: 2px;
+    -webkit-padding-before: 0.35em;
+    -webkit-padding-start: 0.75em;
+    -webkit-padding-end: 0.75em;
+    -webkit-padding-after: 0.625em;
+}

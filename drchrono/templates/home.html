@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block head %}
+    <title>Home</title>
+{% endblock %}
+{% block body %}
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    </ul>
+    <form action="{% url 'auth' %}" method="post">
+        {% csrf_token %}
+{#        <table class="table-bordered">#}
+{#            {{ form }}#}
+{#        </table>#}
+        <label for="username">User name:</label>
+        <input type="text" name="username" value="" id="username"><br>
+        <label for="password">Password:</label>
+        <input type="password" name="password" value="" id="password"><br>
+        <input type="submit" value="login">
+    </form>
+    <br>
+{#    <a href="{% url 'social:begin' 'drchrono' %}">#}
+{#      drchrono OAuth#}
+{#    </a><br>#}
+    <a href="{% url 'register' %}">
+      register
+    </a><br>
+{#    <div id="result">{{ result }}</div>#}
+{% endblock %}

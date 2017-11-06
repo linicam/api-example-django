@@ -1,4 +1,9 @@
 (function () {
+    window.onfocus=function(event){
+        if(event.explicitOriginalTarget===window){
+            alert('activated')
+        }
+    }
     var post = function () {
         var appointment = $(this).parent().attr('id');
         var option = $(this).attr('class');
@@ -14,7 +19,6 @@
                 location.reload()
             },
             error:function (response) {
-                console.log(response)
                 $('#result').html('result: ' + response.status)
             }
         })

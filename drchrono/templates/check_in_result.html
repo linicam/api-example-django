@@ -3,16 +3,10 @@
     <title>Check in result</title>
 {% endblock %}
 {% block body %}
-{{ message }}<br>
-{% if state %}
-    Would you like to update your information?<br>
-    <a href="{% url 'update' %}">Yes</a><br>
-    <a href="{% url 'checkin' %}">No</a><br>
-{% endif %}
+    Hello, {{ first_name }} {{ last_name }},<br>
+    {{ message }}<br>
 redirect after {{ time }} seconds<br>
-{% if not state %}
 <a href="{% url 'checkin' %}">back</a>
-{% endif %}
 {% endblock %}
 {% block js %}
 <script>

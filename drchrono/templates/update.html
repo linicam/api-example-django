@@ -6,12 +6,15 @@
 <body>
     <form action="{% url 'update' %}" method="post">
         {% csrf_token %}
-        <label for="address">Address:</label>
-        <input type="text" name="address" value="" id="address">
-        <label for="cell_phone">Cell phone:</label>
-        <input type="text" name="cell_phone" value="" id="cell_phone">
-        <label for="city">City:</label>
-        <input type="text" name="city" value="" id="city">
+        <table class="table-bordered">
+            {{ form }}
+        </table>
+{#        <label for="address">Address:</label>#}
+{#        <input type="text" name="address" value="" id="address">#}
+{#        <label for="cell_phone">Cell phone:</label>#}
+{#        <input type="text" name="cell_phone" value="" id="cell_phone">#}
+{#        <label for="city">City:</label>#}
+{#        <input type="text" name="city" value="" id="city">#}
     {#    <label for="method">Method(GET, POST):</label>#}
     {#    <input type="text" name="method" value="" id="method">#}
         <input type="submit" value="update">

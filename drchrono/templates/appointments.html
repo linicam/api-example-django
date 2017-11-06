@@ -1,8 +1,18 @@
 {% extends 'base.html' %}
 {% load static %}
+{% block head %}
+    <title>Appointments</title>
+{% endblock %}
 {% block body %}
+    {% if notifications %}
+    <ul class="messages">
+        {% for notification in notifications %}
+        <li class="{{ notification.tag }}">{{ notification.message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
     {% csrf_token %}
-    <h2>Average waited time: {{ average_wait_time|floatformat:1 }} seconds</h2>
+    <h2>Average waited time: {{ average_wait_time|floatformat:-1 }} seconds</h2>
     <h4>Status: {% if in_session %}In session{% else %}Idle{% endif %}</h4>
     <table class="table-bordered">
         <thead>
@@ -19,7 +29,7 @@
         <tbody>
         {% for appointment in appointments %}
         <tr>
-            <td>{{ appointment.patient_first_name }} {{ appointment.patient_last_name }}</td>
+            <td>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</td>
             <td>{{ appointment.scheduled_time|date:"H:i:s" }}</td>
             <td>{{ appointment.duration }}</td>
             <td>{{ appointment.status }}</td>
@@ -35,7 +45,7 @@
     </table>
     <div id="result"></div>
 
-    <a href="{% url 'done' %}">back</a>
+    <a href="{% url 'main' %}">back</a>
 {% endblock %}
 {% block js %}
     <script src='{% static "assets/appointment.js" %}'></script>

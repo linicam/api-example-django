@@ -5,15 +5,24 @@
 {% block body %}
 <form action="{% url 'checkin' %}" method="post">
     {% csrf_token %}
-    <label for="first_name">First name:</label>
-    <input type="text" name="first_name" value="" id="first_name">
-    <label for="last_name">Last name:</label>
-    <input type="text" name="last_name" value="" id="last_name">
-    <label for="ssn">Social security number:</label>
-    <input type="text" name="ssn" value="" id="ssn">
+    <table  class="table-bordered">
+        {{ form }}
+    </table>
+{#    <label for="first_name">First name:</label>#}
+{#    <input type="text" name="first_name" value="" id="first_name">#}
+{#    <label for="last_name">Last name:</label>#}
+{#    <input type="text" name="last_name" value="" id="last_name">#}
+{#    <label for="ssn">Social security number:</label>#}
+{#    <input type="text" name="ssn" value="" id="ssn">#}
 {#    <label for="method">Method(GET, POST):</label>#}
 {#    <input type="text" name="method" value="" id="method">#}
     <input type="submit" value="checkin">
 </form>
-<a href="{% url 'done' %}">back</a>
+<form action="{% url 'logout' %}" method="POST">
+    {% csrf_token %}
+    <button type="submit">Log out</button>
+</form>
+    {% if identity %}
+        <a href="{% url 'main' %}">Main Page</a>
+    {% endif %}
 {% endblock %}
