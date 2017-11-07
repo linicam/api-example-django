@@ -29,8 +29,8 @@ class Patient(models.Model):
     last_name = models.CharField(max_length=100)
     ssn = models.CharField(max_length=20, null=True)
 
-    # def __str__(self):
-    #     return '__'.join([str(self.first_name), str(self.last_name), self.ssn])
+    def __str__(self):
+        return '__'.join([str(self.first_name), str(self.last_name), self.ssn])
 
 
 class Appointments(models.Model):

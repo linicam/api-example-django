@@ -140,10 +140,10 @@ def sync_appointments(user, update_local=False, period=settings.SYNC_PERIOD):
         # print app
         tar = Appointments.objects.filter(pk=app['id'])
         if update_local or len(tar) < 1:
-            helper.print_info('force update app')
+            # helper.print_info('force update app')
             patients = Patient.objects.filter(pk=app['patient'])
             if update_local or len(patients) < 1:
-                helper.print_info('update patient')
+                # helper.print_info('update patient')
                 p = DrchronoRequest.patients_request(user, {'patient': app['patient']})
                 p_attrs = {
                     'patient_id': p['id'],
@@ -158,7 +158,6 @@ def sync_appointments(user, update_local=False, period=settings.SYNC_PERIOD):
                     patient = patients[0]
             else:
                 patient = patients[0]
-            print patient
             attrs = {
                 'doctor': user.profile.doctor,
                 'patient': patient,

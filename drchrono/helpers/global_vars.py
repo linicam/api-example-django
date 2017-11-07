@@ -22,11 +22,13 @@ class DailyGlobalVarsSet:
         if cls.date != datetime.now().date():
             cls.date = datetime.now().date()
             cls.initiate()
+        sync_at_gv = update_local or settings.SYNC_AT_GV
+        sync_create_new = update_local or settings.SYNC_CREATE_NEW
         if user.pk in cls.var:
-            cls.var[user.pk].update(user, update_local)
+            cls.var[user.pk].update(user, sync_at_gv, sync_create_new)
             return cls.var[user.pk]
         v = GlobalVars()
-        v.update(user, settings.SYNC_AT_GV, settings.SYNC_CREATE_NEW)
+        v.update(user, sync_at_gv, sync_create_new)
         cls.var[user.pk] = v
         return cls.var[user.pk]
 
