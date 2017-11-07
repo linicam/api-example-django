@@ -4,7 +4,7 @@ from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseServerError, HttpResponseBadRequest
+from django.http import HttpResponse, HttpResponseServerError, HttpResponseBadRequest, HttpResponseNotFound, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from django.template.context_processors import csrf
@@ -182,9 +182,7 @@ def appointment_requests(request):
         return HttpResponse('update succeed')
     else:
         ntfs = Notification.objects.filter(user=request.user, tag=Notification.INFO)
-        # print len(ntfs)
         Notification.objects.filter(user=request.user, tag=Notification.INFO).delete()
-        # print len(ntfs)
 
         return render_to_response('appointments.html', {
             'appointments': appointments,
@@ -206,19 +204,19 @@ def options(request):
 
     target_app = gv.appointments.filter(appointment=appointment)
     if len(target_app) < 1:
-        return HttpResponse('can\'t find appointment')
+        return Http404('can\'t find appointment')
     target_app = target_app[0]
 
     if option == 'start':
         if user.profile.in_session:
-            return HttpResponse('in session')
+            return HttpResponseBadRequest('in session')
         user.profile.in_session = appointment
         clock.start_clock(gv)
         status = 'In Room'
         pass
     elif option == 'end':
         if not user.profile.in_session:
-            return HttpResponse('no session')
+            return HttpResponseBadRequest('no session')
         user.profile.in_session = None
         clock.stop_clock(gv)
         status = 'Complete'
@@ -230,8 +228,8 @@ def options(request):
         'appointment': target_app.appointment
     }
     res, content = DrchronoRequest.appointment_request(request.user, params, method='PATCH')
-    if not res:
-        return HttpResponse(helper.get_error_msg(res, content))
+    if res >= 400:
+        return HttpResponse(helper.get_error_msg(res, content), status=res)
     target_app.status = status
     target_app.save()
     return HttpResponse(option + 'succeed')
@@ -289,8 +287,8 @@ def check_in(request):
                 'appointment': appointment.appointment
             }
             res, content = DrchronoRequest.appointment_request(request.user, params, method='PATCH')
-            if not res:
-                return HttpResponseServerError(helper.get_error_msg(res, content))
+            if res >= 400:
+                raise HttpResponse(helper.get_error_msg(res, content), status=res)
             appointment.status = 'Arrived'
             appointment.start_wait_time = datetime.now()
             appointment.check_in_time = datetime.now()
@@ -318,7 +316,7 @@ def update(request):
     elif request.method == 'POST':
         patient = request.session['patient']
         if not patient:
-            return HttpResponseBadRequest('no patient checked in')
+            raise Http404('patient has not checked in')
         post = request.POST
         params = {
             'patient': patient,
@@ -328,7 +326,7 @@ def update(request):
         }
         res, content = DrchronoRequest.patients_request(request.user, params, method='PATCH')
         if not res:
-            return HttpResponse(helper.get_error_msg(res, content))
+            return HttpResponse(helper.get_error_msg(res, content), status=res)
         # check updated
         # patient = DrchronoRequest.patients_request({
         #     'patient': patient

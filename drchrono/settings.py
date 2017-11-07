@@ -22,13 +22,13 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = '=*l&a&rk7jmiw$3euke*z9lu-na!^j^i&ddejfik!ajqlaymmc'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 
 # when restart the server, need to update local db or not, work if create_new is true
 SYNC_AT_GV = False
 # if set False, won't send requests to drchrono, else send but only create new things, no update local db
 # for safe, this should always be True
-SYNC_CREATE_NEW = True
+SYNC_CREATE_NEW = False
 SYNC_PERIOD = 3
 
 ALLOWED_HOSTS = ['drchrono.hdh9ypmwvt.us-east-1.elasticbeanstalk.com']
