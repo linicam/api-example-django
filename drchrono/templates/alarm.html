@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% load static %}
+{#{% block head %}#}
+{#    <link rel="stylesheet" href="{% static 'css/jquery.timepicker.min.css' %}">#}
+{#{% endblock %}#}
+{% block body %}
+    {% csrf_token %}
+    <fieldset>
+    <legend>set alarm time</legend>
+        <form action="{% url 'set_time' %}" method="post">
+        {% csrf_token %}
+            {{ form.as_p }}
+        <input type="submit" value="set time">
+        </form>
+    </fieldset>
+{#    <input id="time_picker" class="timepicker timepicker-with-dropdown text-center"><br>#}
+{#    <a id="set_time">Set time</a>#}
+    <table class="table-bordered">
+        <thead>
+        <tr>
+            <th>patient name</th>
+            <th>scheduled time</th>
+            <th>duration</th>
+            <th>status</th>
+{#            <th>start wait time</th>#}
+{#            <th>waited time</th>#}
+        </tr>
+        </thead>
+        <tbody>
+        {% for appointment in appointments %}
+        <tr>
+            <td>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</td>
+            <td>{{ appointment.scheduled_time|date:"Y-m-d H:i:s D" }}</td>
+            <td>{{ appointment.duration }}</td>
+            <td>{{ appointment.status }}</td>
+{#            <td>{{ appointment.start_wait_time|date:"H:i:s" }}</td>#}
+{#            <td>{{ appointment.waited_time }}</td>#}
+{#            <td id="{{ appointment.appointment }}">#}
+{#                <button class="start" {% if in_session or appointment.status != 'Arrived' %}disabled{% endif %}>start</button>#}
+{#                <button class="end" {% if in_session != appointment.pk %}disabled{% endif %}>end</button>#}
+{#            </td>#}
+        </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <div id="result"></div>
+
+    <a href="{% url 'main' %}">back</a>
+{% endblock %}
+{#{% block js %}#}
+{#    <script src='{% static "assets/jquery.timepicker.min.js" %}'></script>#}
+{#    <script src='{% static "assets/alarm.js" %}'></script>#}
+{#{% endblock %}#}

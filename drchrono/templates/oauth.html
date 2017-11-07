@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block head %}
+    <title>oauth</title>
+{% endblock %}
+{% block body %}
+    <a href="{% url 'social:begin' 'drchrono' %}">
+      drchrono OAuth
+    </a><br>
+<form action="{% url 'logout' %}" method="POST">
+    {% csrf_token %}
+    <button type="submit">Log out</button>
+</form>
+{% endblock %}

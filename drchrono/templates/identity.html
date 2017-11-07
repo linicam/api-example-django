@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block head %}
+    <title>identity</title>
+{% endblock %}
+{% block body %}
+    {% csrf_token %}
+    <form action="{% url 'identity' %}" method="post">
+    {% csrf_token %}
+        {{ form.as_p }}
+    <input type="submit" value="submit">
+    </form>
+{% endblock %}
+{#{% block js %}#}
+{#    <script type="text/javascript">#}
+{#    var post = function () {#}
+{#        var identity = $(this).attr('name');#}
+{#        console.log(identity);#}
+{#        $.ajax({#}
+{#            url: "{% url 'identity' %}",#}
+{#            method: 'POST',#}
+{#            data: {#}
+{#                identity: identity,#}
+{#            },#}
+{#            success:function () {#}
+{#                location.reload()#}
+{#                console.log('success')#}
+{#            }#}
+{#        })#}
+{#    };#}
+{#    $('.identity').click(post)#}
+{#    </script>#}
+{#{% endblock %}#}

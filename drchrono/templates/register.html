@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block head %}
+    <title>register</title>
+{% endblock %}
+{% block body %}
+    <form action="{% url 'register' %}" method="post">
+    {% csrf_token %}
+        <table class="table-bordered">
+            {{ form }}<br>
+        </table>
+    <input type="submit" value="register">
+    </form>
+<a href="{% url 'home' %}">back</a>
+{% endblock %}
