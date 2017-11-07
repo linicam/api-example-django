@@ -59,6 +59,8 @@ IDENTITY_URL = '/identity/'
 MEDIA_ROOT = 'E:/pro/api-example-django/drchrono/static/media'
 # MEDIA_URL
 
+ADMINS = [('linicam', 'wjlistruggle@gmail.com'), ]
+
 SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.social_details',
     'social.pipeline.social_auth.social_uid',

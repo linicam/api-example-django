@@ -1,4 +1,4 @@
-.idea/*
+.idea/
 
 .DS_Store
 # Byte-compiled / optimized / DLL files
@@ -91,8 +91,13 @@ ENV/
 
 # Rope project settings
 .ropeproject
-
-# Elastic Beanstalk Files
-.elasticbeanstalk/*
-!.elasticbeanstalk/*.cfg.yml
-!.elasticbeanstalk/*.global.yml
+
+
+# Elastic Beanstalk Files
+
+.elasticbeanstalk/*
+
+!.elasticbeanstalk/*.cfg.yml
+
+!.elasticbeanstalk/*.global.yml
+
