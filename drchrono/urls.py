@@ -1,6 +1,5 @@
 from django.conf.urls import include, url
 from django.contrib import admin
-from django.views.generic import TemplateView
 
 from . import views
 
@@ -17,6 +16,8 @@ urlpatterns = [
     url(r'^checkin/$', views.check_in, name='checkin'),
     url(r'^avatar/$', views.avatar, name='avatar'),
     url(r'^update/$', views.update, name='update'),
+    url(r'^feeds/$', views.AppFeed(), name='feeds'),
+    # url(r'^update/$', views.update, name='update'),
     url(r'^main/$', views.main, name='main'),
     url(r'^logout/$', views.logout, name='logout'),
     url(r'^auth/$', views.auth_view, name='auth'),

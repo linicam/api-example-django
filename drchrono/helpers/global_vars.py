@@ -37,6 +37,7 @@ class DailyGlobalVarsSet:
         cls.var = {}
 
 
+
 class GlobalVars:
     def __init__(self):
         self.appointments = None

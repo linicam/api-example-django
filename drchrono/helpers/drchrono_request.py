@@ -31,7 +31,8 @@ class DrchronoRequest:
         if method == 'GET':
             if 'patient' in params:
                 patients_url += '/' + str(params['patient'])
-                patient = requests.get(patients_url, headers=headers).json()
+                res = requests.get(patients_url, headers=headers)
+                patient = res.json()
                 return patient  # if status_code == 200
             else:
                 # get all patients
@@ -47,7 +48,7 @@ class DrchronoRequest:
         elif method == 'PATCH':
             patients_url += '/' + str(params['patient'])
             res = requests.patch(patients_url, params, headers=headers)
-            if res.status_code >= 300:
+            if res.status_code >= 400:
                 return False, res.reason
             else:
                 return True, res.content
@@ -88,7 +89,7 @@ class DrchronoRequest:
         }
         helper.print_object(params, title='token request')
         token_url = 'https://drchrono.com/o/token'
-        res = requests.post(token_url, params)
+        res = requests.post(token_url, data=params)
         helper.print_object(res)
 
     @classmethod
@@ -99,7 +100,7 @@ class DrchronoRequest:
         appointments_url = 'https://drchrono.com/api/appointments'
         if method == 'GET':
             res = requests.get(appointments_url, params, headers=headers)
-            if res.status_code >= 300:
+            if res.status_code >= 400:
                 # handle 401
                 return res.status_code, res.reason
             data = res.json()
@@ -114,7 +115,7 @@ class DrchronoRequest:
         elif method == 'PATCH':
             appointments_url += '/' + str(params['appointment'])
             res = requests.patch(appointments_url, params, headers=headers)
-            if res.status_code >= 300:
+            if res.status_code >= 400:
                 return res.status_code, res.reason
             else:
                 return res.status_code, res.content
@@ -122,6 +123,27 @@ class DrchronoRequest:
 
 def get_auth_headers(access_token):
     return {'Authorization': 'Bearer {0}'.format(access_token)}
+
+
+def sync_patient(user, app, update_local=False):
+    patients = Patient.objects.filter(pk=app['patient'])
+    if update_local or len(patients) < 1:
+        # helper.print_info('update patient')
+        p = DrchronoRequest.patients_request(user, {'patient': app['patient']})
+        p_attrs = {
+            'patient_id': p['id'],
+            'first_name': p['first_name'],
+            'last_name': p['last_name'],
+            'ssn': p['social_security_number']
+        }
+        if len(patients) < 1:
+            patient = Patient.objects.create(**p_attrs)
+        else:
+            patients.update(**p_attrs)
+            patient = patients[0]
+    else:
+        patient = patients[0]
+    return patient
 
 
 def sync_appointments(user, update_local=False, period=settings.SYNC_PERIOD):
@@ -132,50 +154,34 @@ def sync_appointments(user, update_local=False, period=settings.SYNC_PERIOD):
         'date_range': date_range,
     }
     res, appointments = DrchronoRequest.appointment_request(user, params)
-    if res >= 300:
+    if res >= 400:
         helper.print_error('sync_appointments error code', res)
         return
-    # print app
     for app in appointments:
-        # print app
+        attrs = {
+            'doctor': user.profile.doctor,
+            'status': app['status'],
+            'patient': sync_patient(user, app, update_local),
+            'office': app['office'],
+            'scheduled_time': app['scheduled_time'],
+            'duration': app['duration'],
+            'exam_room': app['exam_room'],
+            'appointment': app['id'],
+        }
         tar = Appointments.objects.filter(pk=app['id'])
-        if update_local or len(tar) < 1:
-            # helper.print_info('force update app')
-            patients = Patient.objects.filter(pk=app['patient'])
-            if update_local or len(patients) < 1:
-                # helper.print_info('update patient')
-                p = DrchronoRequest.patients_request(user, {'patient': app['patient']})
-                p_attrs = {
-                    'patient_id': p['id'],
-                    'first_name': p['first_name'],
-                    'last_name': p['last_name'],
-                    'ssn': p['social_security_number']
-                }
-                if len(patients) < 1:
-                    patient = Patient.objects.create(**p_attrs)
-                else:
-                    patients.update(**p_attrs)
-                    patient = patients[0]
-            else:
-                patient = patients[0]
-            attrs = {
-                'doctor': user.profile.doctor,
-                'patient': patient,
-                'status': app['status'],
-                'office': app['office'],
-                'scheduled_time': app['scheduled_time'],
-                'duration': app['duration'],
-                'exam_room': app['exam_room'],
-                'appointment': app['id']
-            }
+        if len(tar) > 0:
+            if update_local:
+                if app['status'] == 'Arrived' and tar[0].status != 'Arrived':
+                    helper.print_info('update time', app['updated_at'])
+                    attrs['start_wait_time'] = app['updated_at']
+                tar.update(**attrs)
+        else:
+            attrs['waited_time'] = 0
             if app['status'] == 'Arrived':
+                helper.print_info('update time', app['updated_at'])
                 attrs['start_wait_time'] = app['updated_at']
                 attrs['check_in_time'] = app['updated_at']
-                attrs['waited_time'] = 0
-            if len(tar) < 1:
-                Appointments.objects.create(**attrs)
-            else:
-                tar.update(**attrs)
+            Appointments.objects.create(**attrs)
 
 
 def get_future_appointments(user, update_local=False, create_new_in_db=False):

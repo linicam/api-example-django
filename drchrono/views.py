@@ -3,8 +3,10 @@ from datetime import datetime
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.messages import get_messages
+from django.contrib.syndication.views import Feed
 from django.db.models import Q
-from django.http import HttpResponse, HttpResponseServerError, HttpResponseBadRequest, HttpResponseNotFound, Http404
+from django.http import HttpResponse, HttpResponseBadRequest, Http404
 from django.shortcuts import render_to_response, redirect
 from django.template import RequestContext
 from django.template.context_processors import csrf
@@ -54,9 +56,13 @@ def auth_view(request):
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
+        # print form.is_valid()
         if form.is_valid():
             form.save()
             return redirect('/oauth')
+        else:
+            messages.add_message(request, messages.ERROR, 'already existed or invalid register info')
+            return redirect('/register')
     form = UserCreationForm()
     return render_to_response('register.html', {'form': form}, RequestContext(request))
 
@@ -83,8 +89,11 @@ def avatar(request):
     form = AvatarForm(request.POST, request.FILES, instance=request.user.profile)
     if form.is_valid():
         form.save()
+        messages.success(request, "Update successfully")
+    else:
+        messages.error(request, "invalid avatar file")
     # u = User.objects.get(pk=request.user.pk)
-    return redirect('/main')
+    return redirect('/main', RequestContext(request))
 
 
 @login_required
@@ -153,12 +162,12 @@ def main(request):
 
 @login_required
 @user_passes_test(association_check, login_url='/oauth')
-@require_GET
+@require_POST
 def refresh_token(request):
-    return HttpResponse('being test')
+    # return HttpResponse('being test')
     # print '====refresh token====='
-    # DrchronoRequest.token_request(request.user)
-    # return HttpResponse('success')
+    DrchronoRequest.token_request(request.user)
+    return HttpResponse('finished')
 
 
 @login_required
@@ -174,13 +183,12 @@ def appointment_requests(request):
         clock.check_clock(gv)
         gv = DailyGlobalVarsSet.get(request.user)
     appointments = gv.appointments
-
-    waited_patients = Appointments.objects.filter(waited_time__gt=0)
-    waited_times = waited_patients.values_list('waited_time', flat=True)
-    average_wait_time = sum(waited_times) * 1.0 / len(waited_patients) if len(waited_patients) else 0
     if force_syn:
         return HttpResponse('update succeed')
     else:
+        waited_patients = Appointments.objects.filter(waited_time__gt=0)
+        waited_times = waited_patients.values_list('waited_time', flat=True)
+        average_wait_time = sum(waited_times) * 1.0 / len(waited_patients) if len(waited_patients) else 0
         ntfs = Notification.objects.filter(user=request.user, tag=Notification.INFO)
         Notification.objects.filter(user=request.user, tag=Notification.INFO).delete()
 
@@ -263,23 +271,19 @@ def check_in(request):
         appointments = gv.appointments.filter(doctor=doctor, patient__last_name__iexact=last_name,
                                               patient__first_name__iexact=first_name,  # start_wait_time__isnull=True,
                                               scheduled_time__gte=datetime.now())
-        appointments = appointments.filter(Q(status__in=['Confirmed', 'Rescheduled', '', 'In Session']) |
-                                           Q(status__isnull=True))
+        appointments = appointments.filter(
+            Q(status__in=['Confirmed', 'Rescheduled', '', 'In Session', 'Arrived', 'In Room']) |
+            Q(status__isnull=True))
         helper.print_object(appointments, ['status'], 'checkin')
         if ssn is not None and ssn != '':
             appointments = appointments.filter(patient_ssn=ssn)
 
-        msgs = ['Success', 'No appointment find', 'Already checked in']
         l = len(appointments)
-        msg_id = 0
         if l < 1:
-            msg_id = 1
+            messages.add_message(request, messages.ERROR, 'No appointment find')
         elif len(appointments.filter(status__in=['Arrived', 'In Room'])) > 0:
-            msg_id = 2
-        state = msg_id == 0
-        msg = msgs[msg_id]
-
-        if state:
+            messages.add_message(request, messages.ERROR, 'Already checked in')
+        else:
             appointment = appointments[0]
             request.session['patient'] = appointment.patient_id
             params = {
@@ -293,14 +297,15 @@ def check_in(request):
             appointment.start_wait_time = datetime.now()
             appointment.check_in_time = datetime.now()
             appointment.save()
+
+            messages.add_message(request, messages.INFO,
+                                 "You've successfully checked in for appointment scheduled at {0}".format(
+                                     appointment.scheduled_time.strftime(settings.DISPLAY_DATETIME_FORMAT)))
             drchrono.models.create_notification(appointment)
-        args.update({
-            'message': msg,
-        })
-        if state:
             return redirect('/update')
-        else:
-            return render_to_response('check_in_result.html', args)
+        for msg in get_messages(request):
+            print msg
+        return render_to_response('check_in_result.html', args, RequestContext(request))
 
 
 @login_required()
@@ -314,21 +319,60 @@ def update(request):
             'form': form,
         }, RequestContext(request))
     elif request.method == 'POST':
-        patient = request.session['patient']
-        if not patient:
-            raise Http404('patient has not checked in')
-        post = request.POST
-        params = {
-            'patient': patient,
-            'address': post['address'],
-            'cell_phone': post['cell_phone'],
-            'city': post['city']
-        }
-        res, content = DrchronoRequest.patients_request(request.user, params, method='PATCH')
-        if not res:
-            return HttpResponse(helper.get_error_msg(res, content), status=res)
-        # check updated
-        # patient = DrchronoRequest.patients_request({
-        #     'patient': patient
-        # })
-        return redirect('/patients')
+        form = my_forms.UpdateForm(request.POST)
+        if form.is_valid() and helper.check_cell_phtone(request.POST['cell_phone']):
+            patient = request.session['patient']
+            if not patient:
+                raise Http404('patient has not checked in')
+            post = request.POST
+            params = {
+                'patient': patient,
+                'address': post['address'],
+                'cell_phone': post['cell_phone'],
+                'city': post['city']
+            }
+            res, content = DrchronoRequest.patients_request(request.user, params, method='PATCH')
+            if not res:
+                messages.error(request, "Server error")
+                # return redirect('/update', RequestContext(request))
+                # return HttpResponse(helper.get_error_msg(res, content), status=res)
+                # check updated
+            else:
+                patient = DrchronoRequest.patients_request(request.user, {
+                    'patient': patient
+                })
+                helper.print_object(patient)
+                messages.success(request, "Successfully updated personal Info")
+                # return render_to_response('update_result.html', {'time': 10}, RequestContext(request))
+        else:
+            messages.error(request, "Invalid info")
+            # return redirect('/update', RequestContext(request))
+        return render_to_response('update_result.html', {'time': 10}, RequestContext(request))
+
+
+class AppFeed(Feed):
+    link = '/feeds/'
+
+    def item_link(self, item):
+        return '/feeds/'
+
+    def get_object(self, request, *args, **kwargs):
+        return request.user
+
+    def items(self, obj):
+        gv = DailyGlobalVarsSet.get(obj)
+        return gv.appointments
+        # return Appointments.objects.filter(doctor=obj.profile.doctor.pk,
+        #                                    scheduled_time__year=DailyGlobalVarsSet.date.year,
+        #                                    scheduled_time__month=DailyGlobalVarsSet.date.month,
+        #                                    scheduled_time__day=DailyGlobalVarsSet.date.day).order_by('scheduled_time')
+
+    def item_title(self, item):
+        return "{0} {1}".format(item.patient.first_name, item.patient.last_name)
+
+    def item_description(self, item):
+        return str(item.duration)
+        # return {
+        #     'scheduled_time': item.scheduled_time,
+        #     'waited_time': item.waited_time
+        # }

@@ -18,10 +18,13 @@ def print_info(title, msg=None):
 
 def print_object(o, fields=None, title=None):
     print '>>>>>>>', title, '<<<<<<<'
+    print type(o)
     if hasattr(o, '__dict__'):
         fields = fields or vars(o)
-        # if fields:
-        print o, [(field, getattr(o, field, "")) for field in fields]
+        for field in fields:
+            print field, getattr(o, field, "")
+            # if fields:
+            # print o, [(field, getattr(o, field, "")) for field in fields]
     else:
         print o
 
@@ -36,3 +39,7 @@ def print_objects(obj, fields=None, title=None):
 
 def get_error_msg(code, msg):
     return "status code: {0}\nerror message: {1}".format(code, msg)
+
+
+def check_cell_phtone(s):
+    return all(c in '0123456789' for c in s) and len(filter(lambda c: c in '0123456789', list(s))) < 11

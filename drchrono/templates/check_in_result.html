@@ -4,7 +4,12 @@
 {% endblock %}
 {% block body %}
     Hello, {{ first_name }} {{ last_name }},<br>
-    {{ message }}<br>
+    {% if messages %}
+        {% for message in messages %}
+        <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+{#    {{ message }}<br>#}
 redirect after {{ time }} seconds<br>
 <a href="{% url 'checkin' %}">back</a>
 {% endblock %}

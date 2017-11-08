@@ -63,9 +63,9 @@ class IdentityForm(forms.Form):
     identity = forms.ChoiceField(choices=[('doctor', 'As doctor'), ('patient', 'As patient')], widget=forms.RadioSelect)
 
 
-class LoginForm(forms.Form):
-    username = forms.CharField(widget=forms)
-    password = forms.CharField(widget=forms.PasswordInput)
+# class LoginForm(forms.Form):
+#     username = forms.CharField(widget=forms)
+#     password = forms.CharField(widget=forms.PasswordInput)
 
 
 class UpdateForm(forms.Form):

@@ -21,6 +21,26 @@ a:not([href]):not([tabindex]):hover {
     text-decoration: underline;
 }
 
+p {
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.error {
+    color: red;
+    font-weight: bold;
+}
+
+.info {
+    color: blue;
+    font-weight: bold;
+}
+
+.success {
+    color: green;
+    font-weight: bold;
+}
+
 li {
     /*list-style-type: none;*/
 }

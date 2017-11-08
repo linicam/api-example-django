@@ -4,7 +4,14 @@
     <title>Main</title>
 {% endblock %}
 {% block body %}
-Successfully log in! <br>
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+{#Successfully log in! <br>#}
 Welcome, {{ user.username }}<br>
 {% if user.profile.avatar %}
     <p><img src="{% static 'media' %}/{{ user.profile.avatar }}" width="200"/> </p>
@@ -19,6 +26,7 @@ Welcome, {{ user.username }}<br>
 <a id="update">update appointments</a><br>
 <a href="{% url 'checkin' %}">check in</a><br>
 <a id="refresh_token">refresh_token</a><br>
+<a href="{% url 'feeds' %}">feeds</a><br>
 <form action="{% url 'logout' %}" method="POST">
     {% csrf_token %}
     <button type="submit">Log out</button>
@@ -39,7 +47,7 @@ Welcome, {{ user.username }}<br>
     };
     $('#update').click(update);
     var refresh_token = function () {
-        $('#result').html('waiting...');
+        $('#result').html('testing');
         $.ajax({
             url: "{% url 'refresh_token' %}",
             method: 'POST',

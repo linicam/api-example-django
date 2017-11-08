@@ -36,19 +36,19 @@ ALLOWED_HOSTS = ['drchrono.hdh9ypmwvt.us-east-1.elasticbeanstalk.com']
 # linicam
 # SOCIAL_AUTH_DRCHRONO_KEY = 'IkTjfnJytS78j8eiuRB52DXdbIX590LnDU4neuGl'
 # tapir
-# SOCIAL_AUTH_DRCHRONO_KEY = 'ax8am1bvYqQy5p0VvFBQQ4e57UEeJZdum3mdz00X'
+SOCIAL_AUTH_DRCHRONO_KEY = 'ax8am1bvYqQy5p0VvFBQQ4e57UEeJZdum3mdz00X'
 # testli1
-SOCIAL_AUTH_DRCHRONO_KEY = '6GbqLQmJHFZLqaJl3bQv6mJSGbXJGiacEL3P8Kx2'
+# SOCIAL_AUTH_DRCHRONO_KEY = '6GbqLQmJHFZLqaJl3bQv6mJSGbXJGiacEL3P8Kx2'
 
 # linicam
 # SOCIAL_AUTH_DRCHRONO_SECRET = 'vHCSGGtvzEHAcqI6mewooU5alwzFXypUIp0FBAcju8SAZF6WMHC9kvK' \
 #                               'eoSPPbJwT1Y6G9o0RHTsb52PSpBuH1foWWrslHgAQrnw0VW58FxNCWeVm1HAJP8bLn8gAEoQF'
 # tapir
-# SOCIAL_AUTH_DRCHRONO_SECRET = 'LSFBxoyKVPcgz6uOUPhvuNSA8mn7xjH0F134KJPFPgLh5gRmU5IJCHIqA' \
-#                               'GgbPdozi9kvPfZaojZgWCzzrjQxXdYxskIKkR9i15DmmqFXLYhoqcwKSMlW8njuBteZ09LD'
+SOCIAL_AUTH_DRCHRONO_SECRET = 'LSFBxoyKVPcgz6uOUPhvuNSA8mn7xjH0F134KJPFPgLh5gRmU5IJCHIqA' \
+                              'GgbPdozi9kvPfZaojZgWCzzrjQxXdYxskIKkR9i15DmmqFXLYhoqcwKSMlW8njuBteZ09LD'
 # testli1
-SOCIAL_AUTH_DRCHRONO_SECRET = 'xqouwHsnmKSqa7ZYMZOLJVJYfGVNWrejgRUDKCr9eLK3HMT3JcFnADz98' \
-                              'omoZo8p9RfdWGMvsm1PZgALY8dsjshKCcXj8vhLQwddbM34M5fbTP98iBprnepa2XHQrn51'
+# SOCIAL_AUTH_DRCHRONO_SECRET = 'xqouwHsnmKSqa7ZYMZOLJVJYfGVNWrejgRUDKCr9eLK3HMT3JcFnADz98' \
+#                               'omoZo8p9RfdWGMvsm1PZgALY8dsjshKCcXj8vhLQwddbM34M5fbTP98iBprnepa2XHQrn51'
 
 
 SOCIAL_AUTH_DRCHRONO_AUTH_EXTRA_ARGUMENTS = {
