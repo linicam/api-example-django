@@ -29,7 +29,7 @@
         </thead>
         <tbody>
         {% for appointment in appointments %}
-        <tr>
+        <tr class="st_{{ appointment.status|lower }}">
             <td>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</td>
             <td>{{ appointment.patient.ssn }}</td>
             <td>{{ appointment.scheduled_time|date:"H:i:s" }}</td>

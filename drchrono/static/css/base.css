@@ -55,6 +55,10 @@ fieldset {
     -webkit-padding-after: 0.625em;
 }
 
+.st_arrived {
+    color: red;
+}
+
 .status_true {
     color: red;
 }

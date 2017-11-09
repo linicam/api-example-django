@@ -133,6 +133,7 @@ def alarm(request):
 
 @login_required
 @user_passes_test(association_check, login_url='/oauth')
+@identity_check
 @require_POST
 def set_alarm_time(request):
     helper.print_info('set alarm time', request.POST['time'])
@@ -153,6 +154,7 @@ def main(request):
 
 @login_required
 @user_passes_test(association_check, login_url='/oauth')
+@identity_check
 @require_POST
 def refresh_token(request):
     # return HttpResponse('being test')
@@ -181,7 +183,9 @@ def appointment_requests(request):
         waited_times = waited_patients.values_list('waited_time', flat=True)
         average_wait_time = sum(waited_times) * 1.0 / len(waited_patients) if len(waited_patients) else 0
         ntfs = Notification.objects.filter(user=request.user, tag=Notification.INFO)
+        print len(ntfs)
         Notification.objects.filter(user=request.user, tag=Notification.INFO).delete()
+        print ntfs
 
         return render_to_response('appointments.html', {
             'appointments': appointments,
@@ -300,6 +304,7 @@ def check_in(request):
         return render_to_response('check_in_result.html', args, RequestContext(request))
 
 
+@require_GET
 def test_api(request):
     patient = request.session['patient']
     appointment = request.session['appointment']
