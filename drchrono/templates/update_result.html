@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block head %}
+    <title>update result</title>
+{% endblock %}
+{% block body %}
+{#    {{ first_name }} {{ last_name }},<br>#}
+    {% if messages %}
+        {% for message in messages %}
+        <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+        {% endfor %}
+    {% endif %}
+{#    {{ message }}<br>#}
+redirect after {{ time }} seconds<br>
+<a href="{% url 'update' %}">back</a><br>
+<a href="{% url 'checkin' %}">finish</a>
+{% endblock %}
+{% block js %}
+<script>
+    function redirect(){
+       window.location.href = "{% url 'checkin' %}";
+    }
+    var t = {{ time }};
+    setTimeout(redirect, t * 1000); //2000 is equivalent to 2 seconds
+</script>
+{% endblock %}
