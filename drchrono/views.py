@@ -167,6 +167,7 @@ def refresh_token(request):
     # return HttpResponse('being test')
     # print '====refresh token====='
     DrchronoRequest.token_request(request.user)
+    # DrchronoRequest.revoke_token_request(request.user)
     return HttpResponse('finished')
 
 

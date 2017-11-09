@@ -17,8 +17,9 @@ def print_info(title, msg=None):
 
 
 def print_object(o, fields=None, title=None):
+    if not title:
+        title = type(o)
     print '>>>>>>>', title, '<<<<<<<'
-    print type(o)
     if hasattr(o, '__dict__'):
         fields = fields or vars(o)
         for field in fields:

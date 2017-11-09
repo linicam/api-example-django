@@ -54,3 +54,11 @@ fieldset {
     -webkit-padding-end: 0.75em;
     -webkit-padding-after: 0.625em;
 }
+
+.status_true {
+    color: red;
+}
+
+.status_false {
+    color: blue;
+}

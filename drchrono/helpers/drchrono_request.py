@@ -55,16 +55,13 @@ class DrchronoRequest:
 
     @classmethod
     def revoke_token_request(cls, user, headers=None, **kwargs):
-        if headers is None:
-            headers = {}
-        headers.update(cls.get_header(user))
         params = {
             'client_id': settings.SOCIAL_AUTH_DRCHRONO_KEY,
             'client_secret': settings.SOCIAL_AUTH_DRCHRONO_SECRET,
             'token': user.profile.access_token
         }
-        revoke_token_url = 'https://drchrono.com/o/revoke_token'
-        res = requests.post(revoke_token_url, params, headers=headers)
+        revoke_token_url = 'https://drchrono.com/o/revoke_token/'
+        res = requests.post(revoke_token_url, params)
         helper.print_object(res)
 
     @classmethod
@@ -87,10 +84,15 @@ class DrchronoRequest:
             'redirect_uri': '/oauth',
             'refresh_token': user.profile.refresh_token
         }
-        helper.print_object(params, title='token request')
-        token_url = 'https://drchrono.com/o/token'
+        helper.print_object(params, title='params')
+        token_url = 'https://drchrono.com/o/token/'
         res = requests.post(token_url, data=params)
-        helper.print_object(res)
+        d = res.json()
+        helper.print_object(d, title='res data')
+        user.profile.access_token = d['access_token']
+        user.profile.refresh_token = d['refresh_token']
+        user.save()
+        # helper.print_object(res)
 
     @classmethod
     def appointment_request(cls, user, params, headers=None, method='GET', **kwargs):
@@ -172,13 +174,11 @@ def sync_appointments(user, update_local=False, period=settings.SYNC_PERIOD):
         if len(tar) > 0:
             if update_local:
                 if app['status'] == 'Arrived' and tar[0].status != 'Arrived':
-                    helper.print_info('update time', app['updated_at'])
                     attrs['start_wait_time'] = app['updated_at']
                 tar.update(**attrs)
         else:
             attrs['waited_time'] = 0
             if app['status'] == 'Arrived':
-                helper.print_info('update time', app['updated_at'])
                 attrs['start_wait_time'] = app['updated_at']
                 attrs['check_in_time'] = app['updated_at']
             Appointments.objects.create(**attrs)

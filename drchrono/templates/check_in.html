@@ -18,10 +18,10 @@
 {#    <input type="text" name="method" value="" id="method">#}
     <input type="submit" value="checkin">
 </form>
-<form action="{% url 'logout' %}" method="POST">
-    {% csrf_token %}
-    <button type="submit">Log out</button>
-</form>
+{#<form action="{% url 'logout' %}" method="POST">#}
+{#    {% csrf_token %}#}
+{#    <button type="submit">Log out</button>#}
+{#</form>#}
     {% if identity %}
         <a href="{% url 'main' %}">Main Page</a>
     {% endif %}
