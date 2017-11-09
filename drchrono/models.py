@@ -14,6 +14,7 @@ class Doctor(models.Model):
     email = models.EmailField()
     uid = models.IntegerField()  # user id
 
+
     # user = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
     # practice_group = models.IntegerField(default=0)
     # patients_checked = models.IntegerField(default=0)
@@ -28,6 +29,10 @@ class Patient(models.Model):
     first_name = models.CharField(max_length=100)
     last_name = models.CharField(max_length=100)
     ssn = models.CharField(max_length=20, null=True)
+    city = models.CharField(max_length=254, null=True)
+    date_of_birth = models.DateField(null=True)
+    address = models.CharField(null=True, max_length=254)
+    cell_phone = models.CharField(max_length=20, null=True)
 
     def __str__(self):
         return '__'.join([str(self.first_name), str(self.last_name), self.ssn])

@@ -9,17 +9,17 @@ from drchrono.models import Appointments, Patient
 
 
 class DrchronoRequest:
-    headers = {}
+    # headers = {}
 
     def __init__(self):
         pass
 
     @classmethod
     def get_header(cls, user):
-        if user.pk in cls.headers:
-            return cls.headers[user.pk]
+        # if user.pk in cls.headers:
+        #     return cls.headers[user.pk]
         header = get_auth_headers(user.profile.access_token)
-        cls.headers[user.pk] = header
+        # cls.headers[user.pk] = header
         return header
 
     @classmethod
@@ -32,8 +32,10 @@ class DrchronoRequest:
             if 'patient' in params:
                 patients_url += '/' + str(params['patient'])
                 res = requests.get(patients_url, headers=headers)
+                if res.status_code >= 400:
+                    return res.status_code, res.reason
                 patient = res.json()
-                return patient  # if status_code == 200
+                return res.status_code, patient  # if status_code == 200
             else:
                 # get all patients
                 pass
@@ -49,9 +51,9 @@ class DrchronoRequest:
             patients_url += '/' + str(params['patient'])
             res = requests.patch(patients_url, params, headers=headers)
             if res.status_code >= 400:
-                return False, res.reason
+                return res.status_code, res.reason
             else:
-                return True, res.content
+                return res.status_code, res.content
 
     @classmethod
     def revoke_token_request(cls, user, headers=None, **kwargs):
@@ -62,7 +64,28 @@ class DrchronoRequest:
         }
         revoke_token_url = 'https://drchrono.com/o/revoke_token/'
         res = requests.post(revoke_token_url, params)
+        # helper.print_object(res)
+        return res
+
+    @classmethod
+    def test_request(cls, user, params=None, headers=None, **kwargs):
+        if headers is None:
+            headers = {}
+        headers.update(cls.get_header(user))
+        params.update({
+            # 'client_id': settings.SOCIAL_AUTH_DRCHRONO_KEY,
+            # 'client_secret': settings.SOCIAL_AUTH_DRCHRONO_SECRET,
+            # 'token': user.profile.access_token,
+            'verbose': True
+        })
+        # params = {
+        #     'verbose': True
+        # }
+        test_url = 'https://drchrono.com/api/clinical_notes/%s' % params['appointment']
+        helper.print_object(params, title='test params')
+        res = requests.get(test_url, params, headers=headers)
         helper.print_object(res)
+        return res
 
     @classmethod
     def office_request(cls, user, params=None, headers=None, **kwargs):
@@ -70,10 +93,11 @@ class DrchronoRequest:
             params = {}
         if headers is None:
             headers = {}
-        headers.update(cls.headers)
+        headers.update(cls.get_header(user))
         offices_url = 'https://drchrono.com/api/offices'
         res = requests.get(offices_url, params, headers=headers)
-        helper.print_object(res)
+        # helper.print_object(res)
+        return res
 
     @classmethod
     def token_request(cls, user):
@@ -84,14 +108,15 @@ class DrchronoRequest:
             'redirect_uri': '/oauth',
             'refresh_token': user.profile.refresh_token
         }
-        helper.print_object(params, title='params')
+        # helper.print_object(params, title='params')
         token_url = 'https://drchrono.com/o/token/'
         res = requests.post(token_url, data=params)
         d = res.json()
-        helper.print_object(d, title='res data')
+        # helper.print_object(d, title='res data')
         user.profile.access_token = d['access_token']
         user.profile.refresh_token = d['refresh_token']
         user.save()
+        return res
         # helper.print_object(res)
 
     @classmethod
@@ -131,12 +156,15 @@ def sync_patient(user, app, update_local=False):
     patients = Patient.objects.filter(pk=app['patient'])
     if update_local or len(patients) < 1:
         # helper.print_info('update patient')
-        p = DrchronoRequest.patients_request(user, {'patient': app['patient']})
+        code, p = DrchronoRequest.patients_request(user, {'patient': app['patient']})
+        # print p
         p_attrs = {
             'patient_id': p['id'],
             'first_name': p['first_name'],
             'last_name': p['last_name'],
-            'ssn': p['social_security_number']
+            'ssn': p['social_security_number'],
+            'city': p['city'],
+            'date_of_birth': p['date_of_birth']
         }
         if len(patients) < 1:
             patient = Patient.objects.create(**p_attrs)
@@ -176,6 +204,10 @@ def sync_appointments(user, update_local=False, period=settings.SYNC_PERIOD):
                 if app['status'] == 'Arrived' and tar[0].status != 'Arrived':
                     attrs['start_wait_time'] = app['updated_at']
                 tar.update(**attrs)
+                # test = tar.filter(waited_time__lt=0)
+                # if len(test):
+                #     for t in test:
+                #         print t.waited_time, t.start_wait_time, (datetime.now() - t.start_wait_time)
         else:
             attrs['waited_time'] = 0
             if app['status'] == 'Arrived':

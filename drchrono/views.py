@@ -3,7 +3,6 @@ from datetime import datetime
 from django.contrib import auth, messages
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
-from django.contrib.messages import get_messages
 from django.contrib.syndication.views import Feed
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseBadRequest, Http404
@@ -20,7 +19,7 @@ from drchrono.helpers.decorator import association_check, identity_check
 from drchrono.helpers.drchrono_request import DrchronoRequest
 from drchrono.helpers.global_vars import DailyGlobalVarsSet
 from drchrono.helpers.my_forms import CheckInForm, AvatarForm
-from drchrono.models import Appointments, Notification
+from drchrono.models import Appointments, Notification, Patient
 
 
 @require_GET
@@ -29,8 +28,6 @@ def home(request):
         if association_check(request.user):
             return redirect('/identity')
         return redirect('/oauth')
-    # form = my_forms.LoginForm(auto_id=False)
-    # c = {'form': form}
     c = {}
     c.update(csrf(request))
     return render_to_response('home.html', c, RequestContext(request))
@@ -48,7 +45,7 @@ def auth_view(request):
             return redirect('/identity')
         return redirect('/oauth')
     else:
-        messages.add_message(request, messages.ERROR, 'invalid login info')
+        messages.error(request, 'invalid login info')
         return redirect('/')
 
 
@@ -56,12 +53,11 @@ def auth_view(request):
 def register(request):
     if request.method == 'POST':
         form = UserCreationForm(request.POST)
-        # print form.is_valid()
         if form.is_valid():
             form.save()
             return redirect('/oauth')
         else:
-            messages.add_message(request, messages.ERROR, 'already existed or invalid register info')
+            messages.error(request, 'already existed or invalid register info')
             return redirect('/register')
     form = UserCreationForm()
     return render_to_response('register.html', {'form': form}, RequestContext(request))
@@ -70,7 +66,6 @@ def register(request):
 @login_required
 @require_GET
 def oauth_view(request):
-    # print request.user.profile.doctor, association_check(request.user)
     if association_check(request.user):
         return redirect('/identity')
     return render_to_response('oauth.html', context=RequestContext(request))
@@ -128,11 +123,8 @@ def identify(request):
 def alarm(request):
     apps = drchrono_request.get_future_appointments(request.user,
                                                     settings.SYNC_AT_GV, settings.SYNC_CREATE_NEW)
-    # helper.print_object(apps, ['patientfirst_name', 'patient_last_name', 'scheduled_time'])
 
     form = my_forms.DateTimeForm()
-    # form.time3.choices = apps
-
     return render_to_response('alarm.html', {
         'appointments': apps,
         'form': form,
@@ -152,7 +144,6 @@ def set_alarm_time(request):
 @identity_check
 @require_GET
 def main(request):
-    # helper.print_info('main identity', request.session['identity'])
     DailyGlobalVarsSet.get(request.user)
     return render_to_response('main.html', {
         'user': request.user,
@@ -176,7 +167,6 @@ def refresh_token(request):
 @identity_check
 @require_http_methods(["GET", "POST"])
 def appointment_requests(request):
-    # helper.print_object(get_messages(request))
     force_syn = request.method == 'POST'
     gv = DailyGlobalVarsSet.get(request.user, force_syn)
 
@@ -242,13 +232,28 @@ def options(request):
     target_app.status = status
     target_app.save()
     return HttpResponse(option + 'succeed')
-    # return HttpResponse('')
+
+
+@login_required
+@user_passes_test(association_check, login_url='/oauth')
+@identity_check
+@require_http_methods(["GET", "POST"])
+def tester(request):
+    if request.method == 'GET':
+        return render_to_response('api_tester.html')
+    elif request.method == 'POST':
+        pass
 
 
 @login_required
 @user_passes_test(association_check, login_url='/oauth')
 @require_http_methods(["GET", "POST"])
 def check_in(request):
+    # helper.print_objects(Patient.objects.all(), title='patients')
+    if 'patient' in request.session:
+        del request.session['patient']
+    if 'appointment' in request.session:
+        del request.session['appointment']
     gv = DailyGlobalVarsSet.get(request.user)
     if request.method == 'GET':
         form = CheckInForm(auto_id=False)
@@ -257,98 +262,106 @@ def check_in(request):
             'identity': request.session['identity'] == 'doctor'
         }, RequestContext(request))
     elif request.method == 'POST':
-        doctor = request.user.profile.doctor
-
         first_name = request.POST['first_name'].strip()
         last_name = request.POST['last_name'].strip()
         ssn = request.POST['ssn'].strip()
 
         args = {
-            'time': 10,
+            'time': settings.REDIRECT_TIME,
             'first_name': first_name,
             'last_name': last_name,
         }
-
-        appointments = gv.appointments.filter(doctor=doctor, patient__last_name__iexact=last_name,
-                                              patient__first_name__iexact=first_name,  # start_wait_time__isnull=True,
-                                              scheduled_time__gte=datetime.now())
-        appointments = appointments.filter(
+        appointments = gv.appointments.filter(
             Q(status__in=['Confirmed', 'Rescheduled', '', 'In Session', 'Arrived', 'In Room']) |
-            Q(status__isnull=True))
-        helper.print_object(appointments, ['status'], 'checkin')
+            Q(status__isnull=True)).filter(scheduled_time__gte=datetime.now())
+        if len(first_name) > 0 and len(last_name) > 0:
+            appointments = appointments.filter(patient__last_name__iexact=last_name,
+                                               patient__first_name__iexact=first_name)
+        # helper.print_object(appointments, ['status'], 'checkin')
         if ssn is not None and ssn != '':
-            appointments = appointments.filter(patient_ssn=ssn)
+            appointments = appointments.filter(patient__ssn=ssn)
 
         l = len(appointments)
         if l < 1:
-            messages.add_message(request, messages.ERROR, 'No appointment find')
+            messages.error(request, 'No appointment find')
+        # elif l > 1:
+        #     messages.error(request, 'Can not target patient')
         elif len(appointments.filter(status__in=['Arrived', 'In Room'])) > 0:
-            messages.add_message(request, messages.ERROR, 'Already checked in')
+            messages.error(request, 'Already checked in')
         else:
             appointment = appointments[0]
             request.session['patient'] = appointment.patient_id
-            params = {
-                'status': 'Arrived',
-                'appointment': appointment.appointment
-            }
-            res, content = DrchronoRequest.appointment_request(request.user, params, method='PATCH')
-            if res >= 400:
-                raise HttpResponse(helper.get_error_msg(res, content), status=res)
-            appointment.status = 'Arrived'
-            appointment.start_wait_time = datetime.now()
-            appointment.check_in_time = datetime.now()
-            appointment.save()
+            request.session['appointment'] = appointment.pk
 
-            messages.add_message(request, messages.INFO,
-                                 "You've successfully checked in for appointment scheduled at {0}".format(
-                                     appointment.scheduled_time.strftime(settings.DISPLAY_DATETIME_FORMAT)))
-            drchrono.models.create_notification(appointment)
+            patient = Patient.objects.get(pk=appointment.patient_id)
+            messages.info(request, 'Welcome, {0} {1}!'.format(patient.first_name, patient.last_name))
             return redirect('/update')
-        for msg in get_messages(request):
-            print msg
+        # helper.print_objects(get_messages(request))
         return render_to_response('check_in_result.html', args, RequestContext(request))
+
+
+def test_api(request):
+    patient = request.session['patient']
+    appointment = request.session['appointment']
+    res = DrchronoRequest.test_request(request.user, {
+        'patient': patient,
+        'appointment': appointment,
+    })
+    return redirect('/update')
 
 
 @login_required()
 @user_passes_test(association_check, login_url='/oauth')
 @require_http_methods(["GET", "POST"])
 def update(request):
+    patient = request.session['patient']
     DailyGlobalVarsSet.get(request.user)
     if request.method == 'GET':
-        form = my_forms.UpdateForm(auto_id=False)
+        p = Patient.objects.get(pk=patient)
+        form = my_forms.UpdateForm(auto_id=False, initial={
+            'city': p.city,
+            'date_of_birth': p.date_of_birth,
+            'address': p.address,
+            'cell_phone': p.cell_phone,
+        })
         return render_to_response('update.html', {
             'form': form,
         }, RequestContext(request))
     elif request.method == 'POST':
         form = my_forms.UpdateForm(request.POST)
         if form.is_valid() and helper.check_cell_phtone(request.POST['cell_phone']):
-            patient = request.session['patient']
-            if not patient:
-                raise Http404('patient has not checked in')
-            post = request.POST
-            params = {
-                'patient': patient,
-                'address': post['address'],
-                'cell_phone': post['cell_phone'],
-                'city': post['city']
-            }
+            p = Patient.objects.filter(pk=patient)
+            p.update(**form.cleaned_data)
+
+            params = form.cleaned_data
+            params['patient'] = patient
             res, content = DrchronoRequest.patients_request(request.user, params, method='PATCH')
-            if not res:
-                messages.error(request, "Server error")
-                # return redirect('/update', RequestContext(request))
-                # return HttpResponse(helper.get_error_msg(res, content), status=res)
-                # check updated
+            if res >= 400:
+                messages.error(request, "Server error: {0} {1}".format(res, content))
             else:
-                patient = DrchronoRequest.patients_request(request.user, {
-                    'patient': patient
-                })
-                helper.print_object(patient)
-                messages.success(request, "Successfully updated personal Info")
-                # return render_to_response('update_result.html', {'time': 10}, RequestContext(request))
+                # res, content = DrchronoRequest.patients_request(request.user, {'patient': patient})
+                # print res, content
+                appointment = request.session['appointment']
+                params = {
+                    'status': 'Arrived',
+                    'appointment': appointment
+                }
+                res, content = DrchronoRequest.appointment_request(request.user, params, method='PATCH')
+                if res >= 400:
+                    return HttpResponse(helper.get_error_msg(res, content), status=res)
+                app = Appointments.objects.get(pk=appointment)
+                app.status = 'Arrived'
+                app.start_wait_time = datetime.now()
+                app.check_in_time = datetime.now()
+                app.save()
+                drchrono.models.create_notification(app)
+
+                messages.info(request, "You've successfully checked in for appointment scheduled at {0}".format(
+                    app.scheduled_time.strftime(settings.DISPLAY_DATETIME_FORMAT)))
+                # messages.success(request, "Successfully updated personal Info")
         else:
             messages.error(request, "Invalid info")
-            # return redirect('/update', RequestContext(request))
-        return render_to_response('update_result.html', {'time': 10}, RequestContext(request))
+        return render_to_response('update_result.html', {'time': settings.REDIRECT_TIME}, RequestContext(request))
 
 
 class AppFeed(Feed):

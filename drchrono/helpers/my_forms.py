@@ -42,9 +42,9 @@ class DateSelectorWidget(widgets.MultiWidget):
 
 
 class CheckInForm(forms.Form):
-    first_name = forms.CharField(label='First name')
-    last_name = forms.CharField(label='Last name')
-    ssn = forms.CharField(max_length=15, required=False)
+    first_name = forms.CharField(label='First name', required=False)
+    last_name = forms.CharField(label='Last name', required=False)
+    ssn = forms.CharField(max_length=15, required=False, help_text='format: xxx-xx-xxxx')
 
 
 DATE_TIME_CHOICES = [(1, '8:00'), (2, '9:00'), (3, '10:00'), (4, '11:00'), (5, '12:00'),
@@ -72,6 +72,10 @@ class UpdateForm(forms.Form):
     address = forms.CharField(required=False)
     cell_phone = forms.CharField(max_length=10, required=False)
     city = forms.CharField(required=False)
+    date_of_birth = forms.DateField(widget=forms.TextInput(attrs={
+        'class': 'datepicker',
+        'readonly': 'true'
+    }))
 
 
 class AvatarForm(forms.ModelForm):

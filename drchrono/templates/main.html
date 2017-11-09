@@ -27,6 +27,7 @@ Welcome, {{ user.username }}<br>
 <a href="{% url 'checkin' %}">check in</a><br>
 <a id="refresh_token">refresh_token</a><br>
 <a href="{% url 'feeds' %}">feeds</a><br>
+<a href="{% url 'tester' %}">api tester</a><br>
 <form action="{% url 'logout' %}" method="POST">
     {% csrf_token %}
     <button type="submit">Log out</button>

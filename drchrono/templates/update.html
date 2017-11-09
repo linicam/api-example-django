@@ -3,10 +3,10 @@
     <title>Update</title>
 {% endblock %}
 {% block body %}
-<body>
+    <body>
     {% if messages %}
         {% for message in messages %}
-        <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
+            <p{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</p>
         {% endfor %}
     {% endif %}
     <form action="{% url 'update' %}" method="post">
@@ -14,16 +14,32 @@
         <table class="table-bordered">
             {{ form }}
         </table>
-{#        <label for="address">Address:</label>#}
-{#        <input type="text" name="address" value="" id="address">#}
-{#        <label for="cell_phone">Cell phone:</label>#}
-{#        <input type="text" name="cell_phone" value="" id="cell_phone">#}
-{#        <label for="city">City:</label>#}
-{#        <input type="text" name="city" value="" id="city">#}
-    {#    <label for="method">Method(GET, POST):</label>#}
-    {#    <input type="text" name="method" value="" id="method">#}
+        {#        <label for="address">Address:</label>#}
+        {#        <input type="text" name="address" value="" id="address">#}
+        {#        <label for="cell_phone">Cell phone:</label>#}
+        {#        <input type="text" name="cell_phone" value="" id="cell_phone">#}
+        {#        <label for="city">City:</label>#}
+        {#        <input type="text" name="city" value="" id="city">#}
+        {#    <label for="method">Method(GET, POST):</label>#}
+        {#    <input type="text" name="method" value="" id="method">#}
         <input type="submit" value="update">
     </form>
+    {#    <a href="{% url 'testapi' %}">test clinical APIs</a><br>#}
     <a href="{% url 'checkin' %}">Cancel</a>
-</body>
+    </body>
+{% endblock %}
+{% block js %}
+    <script>
+        $(function () {
+            $(".datepicker").datepicker({
+                changeMonth: true,
+                changeYear: true,
+                yearRange: "1900:2017",
+                dateFormat: "yy-mm-dd",
+                defaultDate: new Date()
+                // You can put more options here.
+
+            });
+        });
+    </script>
 {% endblock %}

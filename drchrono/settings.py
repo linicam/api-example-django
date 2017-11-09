@@ -30,6 +30,7 @@ SYNC_AT_GV = False
 # for safe, this should always be True
 SYNC_CREATE_NEW = False
 SYNC_PERIOD = 3
+REDIRECT_TIME = 10
 
 ALLOWED_HOSTS = ['drchrono.hdh9ypmwvt.us-east-1.elasticbeanstalk.com']
 
@@ -60,7 +61,7 @@ LOGIN_URL = '/'
 SOCIAL_AUTH_DRCHRONO_LOGIN_REDIRECT_URL = '/identity/'
 SOCIAL_AUTH_DRCHRONO_LOGIN_ERROR_URL = '/oauth'
 DISCONNECT_REDIRECT_URL = '/'
-IDENTITY_URL = '/identity/'
+IDENTITY_URL = '/identity/' # same to that in urls.py
 
 MEDIA_ROOT = 'E:/pro/api-example-django/drchrono/static/media'
 # MEDIA_URL

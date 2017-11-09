@@ -18,6 +18,7 @@
         <thead>
         <tr>
             <th>patient name</th>
+            <th>social security number</th>
             <th>scheduled time</th>
             <th>duration</th>
             <th>status</th>
@@ -30,6 +31,7 @@
         {% for appointment in appointments %}
         <tr>
             <td>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</td>
+            <td>{{ appointment.patient.ssn }}</td>
             <td>{{ appointment.scheduled_time|date:"H:i:s" }}</td>
             <td>{{ appointment.duration }}</td>
             <td>{{ appointment.status }}</td>
