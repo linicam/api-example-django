@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block head %}
     <title>Update</title>
 {% endblock %}
@@ -29,6 +30,7 @@
     </body>
 {% endblock %}
 {% block js %}
+    <script src='{% static "assets/jquery-ui.min.js" %}'></script>
     <script>
         $(function () {
             $(".datepicker").datepicker({

@@ -1,11 +1,31 @@
-from datetime import datetime
+from time import time
 
+from datetime import datetime
 from django.contrib.auth.models import User
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+import settings
 
-from drchrono.helpers import model_helper
+
+def create_notification(app):
+    msg = 'Patient {0} {1} has checked in on {2} for appointment scheduled at {3}'.format(
+        app.patient.first_name, app.patient.last_name,
+        app.check_in_time.strftime(settings.DISPLAY_DATETIME_FORMAT) if isinstance(app.check_in_time, type(
+            datetime.now())) else app.check_in_time,
+        app.scheduled_time)
+    args = {
+        'user': User.objects.get(profile__doctor=app.doctor),
+        'message': msg,
+        'appointment': app,
+        'tag': Notification.INFO,
+    }
+    Notification.objects.create(**args)
+
+
+def get_upload_file_name(instance, filename):
+    # helper.print_info('get upload file name')
+    return '%s_%s' % (str(time()).replace('.', '_'), filename)
 
 
 class Doctor(models.Model):
@@ -13,12 +33,6 @@ class Doctor(models.Model):
     username = models.CharField(max_length=254)
     email = models.EmailField()
     uid = models.IntegerField()  # user id
-
-
-    # user = models.ForeignKey(User, default=None, on_delete=models.CASCADE)
-    # practice_group = models.IntegerField(default=0)
-    # patients_checked = models.IntegerField(default=0)
-    # total_wait_time = models.IntegerField(default=0)
 
     def __str__(self):
         return '_'.join([self.username, str(self.pk), str(self.uid)])
@@ -61,7 +75,7 @@ class Appointments(models.Model):
 def on_check_in(sender, instance, created, **kwargs):
     if created and instance.status == 'Arrived':
         create_notification(instance)
-    # pass
+        # pass
 
 
 class Notification(models.Model):
@@ -83,7 +97,7 @@ class Profile(models.Model):
     access_token = models.CharField(max_length=254)
     refresh_token = models.CharField(max_length=254)
     in_session = models.IntegerField(null=True)
-    avatar = models.FileField(null=True, upload_to=model_helper.get_upload_file_name)
+    avatar = models.FileField(null=True, upload_to=get_upload_file_name)
 
 
 @receiver(post_save, sender=User)
@@ -95,17 +109,3 @@ def create_user_profile(sender, instance, created, **kwargs):
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     instance.profile.save()
-
-
-def create_notification(app):
-    msg = 'Patient {0} {1} has checked in on {2} for appointment scheduled at {3}'.format(
-        app.patient.first_name, app.patient.last_name,
-        app.check_in_time,
-        app.scheduled_time)
-    args = {
-        'user': User.objects.get(profile__doctor=app.doctor),
-        'message': msg,
-        'appointment': app,
-        'tag': Notification.INFO,
-    }
-    Notification.objects.create(**args)

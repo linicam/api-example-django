@@ -18,7 +18,8 @@
         <thead>
         <tr>
             <th>patient name</th>
-            <th>social security number</th>
+            <th>SSN</th>
+            <th>cell phone number</th>
             <th>scheduled time</th>
             <th>duration</th>
             <th>status</th>
@@ -32,14 +33,17 @@
         <tr class="st_{{ appointment.status|lower }}">
             <td>{{ appointment.patient.first_name }} {{ appointment.patient.last_name }}</td>
             <td>{{ appointment.patient.ssn }}</td>
+            <td>{{ appointment.patient.cell_phone }}</td>
             <td>{{ appointment.scheduled_time|date:"H:i:s" }}</td>
             <td>{{ appointment.duration }}</td>
             <td>{{ appointment.status }}</td>
 {#            <td>{{ appointment.start_wait_time|date:"H:i:s" }}</td>#}
             <td>{{ appointment.waited_time }}</td>
             <td id="{{ appointment.appointment }}">
-                <button class="start" {% if in_session or appointment.status != 'Arrived' %}disabled{% endif %}>start</button>
-                <button class="end" {% if in_session != appointment.pk %}disabled{% endif %}>end</button>
+{#                <button class="start" {% if in_session or appointment.status != 'Arrived' %}disabled{% endif %}>start</button>#}
+{#                <button class="end" {% if in_session != appointment.pk %}disabled{% endif %}>end</button>#}
+                <a class="start{% if in_session or appointment.status != 'Arrived' %} disabled{% endif %}">start</a>
+                <a class="end{% if in_session != appointment.pk %} disabled{% endif %}">end</a>
             </td>
         </tr>
         {% endfor %}

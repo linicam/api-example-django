@@ -1,19 +1,14 @@
 (function () {
-    window.onfocus=function(event){
-        if(event.explicitOriginalTarget===window){
-            alert('activated')
-        }
-    }
     var post = function () {
+        $('#result').html('waiting...');
         var appointment = $(this).parent().attr('id');
         var option = $(this).attr('class');
         console.log(appointment);
         $.ajax({
-            url: "/options/",
+            url: "/appointments/" + appointment + "/actions/",
             method: 'POST',
             data: {
-                option: option,
-                appointment: appointment
+                option: option
             },
             success:function (result) {
                 location.reload()

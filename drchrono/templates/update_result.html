@@ -11,7 +11,9 @@
     {% endif %}
 {#    {{ message }}<br>#}
 redirect after {{ time }} seconds<br>
-<a href="{% url 'update' %}">back</a><br>
+    {% if has_error %}
+        <a href="{% url 'update' %}">back</a><br>
+    {% endif %}
 <a href="{% url 'checkin' %}">finish</a>
 {% endblock %}
 {% block js %}

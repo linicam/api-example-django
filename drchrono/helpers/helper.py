@@ -1,19 +1,16 @@
-def print_error(title, msg):
+import re
+
+
+def print_error(title, *args):
     print '======= ERROR!', title, '======='
-    if type(msg) == 'list':
-        for m in msg:
-            print m
-    else:
-        print msg
+    for arg in args:
+        print arg
 
 
-def print_info(title, msg=None):
+def print_info(title, *args):
     print '-------', title, '-------'
-    if type(msg) == 'list':
-        for m in msg:
-            print m
-    elif msg:
-        print msg
+    for arg in args:
+        print arg
 
 
 def print_object(o, fields=None, title=None):
@@ -24,8 +21,6 @@ def print_object(o, fields=None, title=None):
         fields = fields or vars(o)
         for field in fields:
             print field, getattr(o, field, "")
-            # if fields:
-            # print o, [(field, getattr(o, field, "")) for field in fields]
     else:
         print o
 
@@ -34,8 +29,6 @@ def print_objects(obj, fields=None, title=None):
     print '+++++++', title, '+++++++'
     for o in obj:
         print_object(o, fields, title)
-        # else:
-        #     print o, [(k, vars(o)[k]) for k in vars(o)]
 
 
 def get_error_msg(code, msg):
@@ -43,4 +36,5 @@ def get_error_msg(code, msg):
 
 
 def check_cell_phtone(s):
-    return all(c in '0123456789' for c in s) and len(filter(lambda c: c in '0123456789', list(s))) < 11
+    reg = re.compile(r'^[(]?[\d]{3}[-) ]?[\d]{3}[- ]?[\d]{4}$')
+    return reg.match(s) is not None or len(s) == 0

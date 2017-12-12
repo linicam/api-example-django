@@ -22,12 +22,12 @@ Welcome, {{ user.username }}<br>
 <button type="submit">Upload Avatar</button>
 </form>
 <a href="{% url 'appointments' %}">appointments</a><br>
-<a href="{% url 'alarm' %}">alarms</a><br>
+{#<a href="{% url 'alarm' %}">alarms</a><br>#}
 <a id="update">update appointments</a><br>
 <a href="{% url 'checkin' %}">check in</a><br>
 <a id="refresh_token">refresh_token</a><br>
-<a href="{% url 'feeds' %}">feeds</a><br>
-<a href="{% url 'tester' %}">api tester</a><br>
+{#<a href="{% url 'feeds' %}">feeds</a><br>#}
+{#<a href="{% url 'tester' %}">api tester</a><br>#}
 <form action="{% url 'logout' %}" method="POST">
     {% csrf_token %}
     <button type="submit">Log out</button>

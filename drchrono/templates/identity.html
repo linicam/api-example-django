@@ -3,7 +3,11 @@
     <title>identity</title>
 {% endblock %}
 {% block body %}
-    {% csrf_token %}
+    <ul class="messages">
+        {% for message in messages %}
+        <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+        {% endfor %}
+    </ul>
     <form action="{% url 'identity' %}" method="post">
     {% csrf_token %}
         {{ form.as_p }}

@@ -8,8 +8,6 @@ from drchrono.models import Profile
 
 class DateSelectorWidget(widgets.MultiWidget):
     def __init__(self, attrs=None):
-        # create choices for days, months, years
-        # example below, the rest snipped for brevity.
         years = [(year, year) for year in (2011, 2012, 2013)]
         days = [(day, day) for day in (1, 11, 13)]
         months = [(month, month) for month in (1, 8, 11)]
@@ -63,11 +61,6 @@ class IdentityForm(forms.Form):
     identity = forms.ChoiceField(choices=[('doctor', 'As doctor'), ('patient', 'As patient')], widget=forms.RadioSelect)
 
 
-# class LoginForm(forms.Form):
-#     username = forms.CharField(widget=forms)
-#     password = forms.CharField(widget=forms.PasswordInput)
-
-
 class UpdateForm(forms.Form):
     address = forms.CharField(required=False)
     cell_phone = forms.CharField(max_length=10, required=False)
@@ -82,3 +75,15 @@ class AvatarForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ('avatar',)
+
+
+METHODS = [('get', 'GET'), ('post', 'POST'), ('head', 'HEAD'), ('options', 'OPTIONS'), ('patch', 'PATCH')]
+
+
+class TesterForm(forms.Form):
+    access_token = forms.CharField(max_length=254, widget=forms.TextInput(attrs={
+        'disabled': 'true'
+    }))
+    url = forms.URLField(initial='https://drchrono.com/api/')
+    method = forms.ChoiceField(choices=METHODS)
+    params = forms.CharField(widget=forms.Textarea, initial='{\n\n}')

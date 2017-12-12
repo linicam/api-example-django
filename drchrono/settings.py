@@ -29,7 +29,7 @@ SYNC_AT_GV = False
 # if set False, won't send requests to drchrono, else send but only create new things, no update local db
 # for safe, this should always be True
 SYNC_CREATE_NEW = False
-SYNC_PERIOD = 3
+SYNC_PERIOD = 1
 REDIRECT_TIME = 10
 
 ALLOWED_HOSTS = ['drchrono.hdh9ypmwvt.us-east-1.elasticbeanstalk.com']
@@ -58,10 +58,10 @@ SOCIAL_AUTH_DRCHRONO_AUTH_EXTRA_ARGUMENTS = {
 }
 
 LOGIN_URL = '/'
-# SOCIAL_AUTH_DRCHRONO_LOGIN_REDIRECT_URL = '/identity/'
+SOCIAL_AUTH_DRCHRONO_LOGIN_REDIRECT_URL = '/identity/'
 SOCIAL_AUTH_DRCHRONO_LOGIN_ERROR_URL = '/oauth'
 DISCONNECT_REDIRECT_URL = '/'
-IDENTITY_URL = '/identity/' # same to that in urls.py
+IDENTITY_URL = '/identity/'  # same to that in urls.py
 
 MEDIA_ROOT = 'E:/pro/api-example-django/drchrono/static/media'
 # MEDIA_URL
@@ -79,6 +79,7 @@ SOCIAL_AUTH_PIPELINE = (
     'social.pipeline.social_auth.associate_user',
     'social.pipeline.social_auth.load_extra_data',
     'social.pipeline.user.user_details',
+    'social_auth_drchrono.backends.bind_doctor',
 )
 
 # Application definition
@@ -165,6 +166,6 @@ DATE_FORMAT = '%Y-%m-%d'
 
 STATIC_URL = '/drchrono/static/'
 
-STATIC_ROOT = 'E:/pro/api-example-django/drchrono/static'
+# STATIC_ROOT = 'E:/pro/api-example-django/drchrono/static'
 
 STATICFILES_DIRS = []

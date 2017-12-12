@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from social.backends.oauth import BaseOAuth2
 
 from drchrono.helpers import helper
-from drchrono.helpers.drchrono_request import get_auth_headers
+from drchrono.helpers.request_handler import get_header_with_token
 from drchrono.models import Doctor
 
 
@@ -44,22 +44,24 @@ class drchronoOAuth2(BaseOAuth2):
         """
         return self.get_json(
             self.USER_DATA_URL,
-            headers=get_auth_headers(access_token)
+            headers=get_header_with_token(access_token)
         )
 
 
 def add_user(details, user, uid, *args, **kwargs):
     if user is None:
+        helper.print_error('add user', 'no user')
         user = User.objects.create()
-    doctor = Doctor.objects.filter(pk=details['doctor_id'])
-    if len(doctor) != 1:
-        doctor = Doctor(username=details['username'], doctor_id=details['doctor_id'],
-                         uid=uid)
-    else:
-        doctor = doctor[0]
-    doctor.save()
-    user.profile.doctor = doctor
     user.profile.access_token = details['access_token']
     user.profile.refresh_token = details['refresh_token']
     user.save()
-    # helper.print_object(user)
+
+
+def bind_doctor(details, user, uid, *args, **kwargs):
+    try:
+        doctor = Doctor.objects.get(pk=details['doctor_id'])
+    except Doctor.DoesNotExist:
+        doctor = Doctor(username=details['username'], doctor_id=details['doctor_id'], uid=uid)
+    doctor.save()
+    user.profile.doctor = doctor
+    user.save()
